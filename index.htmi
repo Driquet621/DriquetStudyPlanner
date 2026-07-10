@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+<title>스터디 플래너 🌸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===================== 기본 리셋 ===================== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background .35s ease, color .35s ease;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    min-height: 100vh;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, textarea { font-family: inherit; color: inherit; }
+  ul { list-style: none; }
+  .hidden { display: none !important; }
+
+  /* ===================== 테마 토큰 ===================== */
+  body[data-theme="pink"]{
+    --bg:#FBE4EC; --bg-grad:#FCEFF3; --card-bg:#FFFFFF; --text:#4A3B42; --text-soft:#9A8590;
+    --accent:#FF7CA3; --accent-dark:#F2578A; --accent-soft:#FFE1EC; --border:#FFD3E1;
+    --shadow: 230,120,150; --input-bg:#FFF6F9;
+  }
+  body[data-theme="dark"]{
+    --bg:#201A22; --bg-grad:#241D26; --card-bg:#2E2530; --text:#F3E9EE; --text-soft:#B9A6B2;
+    --accent:#FF7CA3; --accent-dark:#E85585; --accent-soft:#3A2C36; --border:#453640;
+    --shadow: 0,0,0; --input-bg:#251E27;
+  }
+  body[data-theme="blue"]{
+    --bg:#E6F0FB; --bg-grad:#EEF5FD; --card-bg:#FFFFFF; --text:#25384A; --text-soft:#7086A0;
+    --accent:#5B93E8; --accent-dark:#3E75CC; --accent-soft:#DCEBFF; --border:#CFE1F7;
+    --shadow: 90,140,220; --input-bg:#F3F8FE;
+  }
+  body[data-theme="mint"]{
+    --bg:#E3F7EE; --bg-grad:#ECFAF3; --card-bg:#FFFFFF; --text:#20443A; --text-soft:#6C9C8B;
+    --accent:#3FBE8C; --accent-dark:#2A9C70; --accent-soft:#D6F5E7; --border:#C7EDDB;
+    --shadow: 60,180,140; --input-bg:#F2FBF6;
+  }
+  body[data-theme="lavender"]{
+    --bg:#F0EAFB; --bg-grad:#F5F1FC; --card-bg:#FFFFFF; --text:#372C4C; --text-soft:#8676A3;
+    --accent:#9B7FE0; --accent-dark:#7C5BC9; --accent-soft:#E6DBFA; --border:#DDD0F5;
+    --shadow: 140,110,220; --input-bg:#F7F3FD;
+  }
+  /* 우선도 색상은 테마와 무관하게 고정 (인식성 유지) */
+  :root{
+    --p-high-bg:#FFE0E5; --p-high-text:#E23F5F;
+    --p-mid-bg:#FFF1D0; --p-mid-text:#C97F0E;
+    --p-low-bg:#DDF6E8; --p-low-text:#1F9C63;
+  }
+
+  /* ===================== UI 비율(스케일) ===================== */
+  body[data-scale="s"]{ --scale: 0.86; }
+  body[data-scale="m"]{ --scale: 1; }
+  body[data-scale="l"]{ --scale: 1.2; }
+
+  /* ===================== 레이아웃 ===================== */
+  .app-wrap{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 28px 18px 8px;
+  }
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 18px;
+  }
+  header.top .title{
+    font-family:'Gowun Dodum', cursive;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+  }
+  header.top .date{
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-top: 4px;
+  }
+  header.top .title-row{ display:flex; flex-direction:column; }
+  header.top .badge-count{
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    box-shadow: 0 4px 14px rgba(var(--shadow), 0.12);
+  }
+
+  /* 명언 배너 */
+  .quote-card{
+    background: var(--card-bg);
+    border-radius: 22px;
+    padding: 20px 22px;
+    box-shadow: 0 8px 22px rgba(var(--shadow), 0.14);
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .quote-card::before{
+    content: "“";
+    position: absolute;
+    top: -18px; left: 6px;
+    font-family: Georgia, serif;
+    font-size: 90px;
+    color: var(--accent-soft);
+    line-height: 1;
+    z-index: 0;
+  }
+  .quote-text{
+    position: relative; z-index: 1;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.55;
+    padding-left: 6px;
+  }
+  .quote-foot{
+    position: relative; z-index: 1;
+    display:flex; justify-content:flex-end; margin-top: 10px;
+  }
+  .quote-refresh{
+    font-size: 12px;
+    color: var(--accent-dark);
+    font-weight: 700;
+    display:flex; align-items:center; gap:4px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+  }
+  .quote-refresh:hover{ opacity: .8; }
+
+  /* 긴급 알림 배너 */
+  .urgent-banner{
+    background: linear-gradient(135deg, #FF6F7D, #FF9068);
+    color: #fff;
+    border-radius: 20px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 20px rgba(255,110,110,0.35);
+    animation: pop-in .25s ease;
+  }
+  @keyframes pop-in{ from{ transform: scale(.96); opacity:0;} to{ transform: scale(1); opacity:1;} }
+  .urgent-banner .u-title{
+    font-weight: 800; font-size: 14.5px; display:flex; align-items:center; gap:6px; margin-bottom:6px;
+  }
+  .urgent-banner ul{ margin: 4px 0 8px 2px; }
+  .urgent-banner li{ font-size: 13px; opacity: .95; padding: 2px 0; }
+  .urgent-close{
+    font-size: 12px; font-weight:700; background: rgba(255,255,255,0.25);
+    padding: 5px 12px; border-radius: 999px; float:right;
+  }
+
+  /* 필터 탭 */
+  .filter-tabs{
+    display:flex; gap:8px; margin-bottom: 14px;
+  }
+  .filter-tabs button{
+    flex:1;
+    padding: calc(10px * var(--scale)) 0;
+    border-radius: 14px;
+    font-size: calc(13px * var(--scale));
+    font-weight: 700;
+    background: var(--card-bg);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    transition: all .2s ease;
+  }
+  .filter-tabs button.active{
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* 할 일 카드 */
+  #taskList{ display:flex; flex-direction:column; gap: calc(12px * var(--scale)); }
+  .task-card{
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: calc(16px * var(--scale)) calc(18px * var(--scale));
+    box-shadow: 0 6px 16px rgba(var(--shadow), 0.10);
+    border: 1px solid transparent;
+    transition: opacity .2s ease, transform .15s ease;
+  }
+  .task-card.overdue{ border-color: #FF8FA0; }
+  .task-card.done{ opacity: .55; }
+  .task-top{
+    display:flex; align-items:flex-start; gap: 10px;
+  }
+  .task-check{
+    width: calc(24px * var(--scale)); height: calc(24px * var(--scale));
+    border-radius: 999px;
+    border: 2px solid var(--border);
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    margin-top: 2px;
+  }
+  .task-check.checked{ background: var(--accent); border-color: var(--accent); }
+  .task-check svg{ width: 60%; height:60%; fill:#fff; opacity:0; }
+  .task-check.checked svg{ opacity:1; }
+  .task-main{ flex:1; min-width:0; }
+  .task-head-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .task-title{
+    font-size: calc(15.5px * var(--scale));
+    font-weight: 700;
+    word-break: break-word;
+  }
+  .task-card.done .task-title{ text-decoration: line-through; color: var(--text-soft); }
+  .p-badge{
+    font-size: calc(11px * var(--scale));
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .p-badge.high{ background: var(--p-high-bg); color: var(--p-high-text); }
+  .p-badge.mid{ background: var(--p-mid-bg); color: var(--p-mid-text); }
+  .p-badge.low{ background: var(--p-low-bg); color: var(--p-low-text); }
+  .task-meta-row{
+    display:flex; align-items:center; gap:10px; margin-top: 6px; flex-wrap:wrap;
+  }
+  .dday-badge{
+    font-size: calc(11.5px * var(--scale));
+    font-weight: 700;
+    color: var(--text-soft);
+  }
+  .dday-badge.urgent{ color: #E2415A; }
+  .dday-badge.overdue{ color: #E2415A; }
+  .sub-progress{
+    font-size: calc(11.5px * var(--scale));
+    color: var(--text-soft);
+    font-weight: 600;
+  }
+  .task-actions{ display:flex; align-items:center; gap: 6px; flex-shrink:0; }
+  .icon-btn-sm{
+    width: calc(28px * var(--scale)); height: calc(28px * var(--scale));
+    border-radius: 999px;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--text-soft);
+  }
+  .icon-btn-sm:hover{ background: var(--accent-soft); color: var(--accent-dark); }
+  .icon-btn-sm svg{ width: 55%; height: 55%; }
+
+  .subtask-wrap{ margin-top: 10px; padding-left: calc(34px * var(--scale)); display:none; }
+  .task-card.expanded .subtask-wrap{ display:block; }
+  .subtask-item{
+    display:flex; align-items:center; gap:8px; padding: 5px 0;
+    font-size: calc(13px * var(--scale));
+  }
+  .subtask-item .sub-check{
+    width: 17px; height:17px; border-radius: 6px; border: 2px solid var(--border);
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  }
+  .subtask-item .sub-check.checked{ background: var(--accent); border-color: var(--accent); }
+  .subtask-item .sub-check svg{ width:65%; height:65%; fill:#fff; opacity:0; }
+  .subtask-item .sub-check.checked svg{ opacity:1; }
+  .subtask-item span.sub-text{ flex:1; }
+  .subtask-item.done span.sub-text{ text-decoration: line-through; color: var(--text-soft); }
+  .subtask-add-form{
+    display:flex; gap:6px; margin-top: 6px;
+  }
+  .subtask-add-form input{
+    flex:1; background: var(--input-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 10px; font-size: 12.5px; color: var(--text);
+  }
+  .subtask-add-form button{
+    background: var(--accent-soft); color: var(--accent-dark); font-weight:700;
+    padding: 0 12px; border-radius: 10px; font-size: 12px;
+  }
+
+  .empty-state{
+    text-align:center; padding: 50px 20px; color: var(--text-soft);
+  }
+  .empty-state .emoji{ font-size: 40px; margin-bottom: 10px; }
+  .empty-state p{ font-size: 14px; font-weight: 600; }
+
+  /* ===================== 하단 네비게이션 ===================== */
+  .bottom-nav{
+    position: fixed; left:0; right:0; bottom:0;
+    height: calc(70px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--accent);
+    display:flex; align-items:center; justify-content:space-between;
+    padding-left: 32px; padding-right: 32px;
+    box-shadow: 0 -6px 22px rgba(var(--shadow), 0.28);
+    z-index: 50;
+  }
+  .nav-icon-btn{
+    width: calc(44px * var(--scale)); height: calc(44px * var(--scale));
+    display:flex; align-items:center; justify-content:center;
+    border-radius: 999px;
+  }
+  .nav-icon-btn:active{ background: rgba(255,255,255,0.18); }
+  .nav-icon-btn svg{ width: calc(24px * var(--scale)); height: calc(24px * var(--scale)); fill:#fff; }
+
+  .fab{
+    position:absolute; left:50%; top:-26px; transform: translateX(-50%);
+    width: calc(60px * var(--scale)); height: calc(60px * var(--scale));
+    border-radius: 999px;
+    background: var(--card-bg);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 8px 18px rgba(var(--shadow), 0.35);
+    border: 4px solid var(--accent);
+  }
+  .fab svg{ width: 44%; height:44%; fill: var(--accent-dark); }
+  .fab:active{ transform: translateX(-50%) scale(.94); }
+
+  /* ===================== 모달 ===================== */
+  .modal-overlay{
+    position: fixed; inset:0; background: rgba(20,15,20,0.45);
+    display:flex; align-items:flex-end; justify-content:center;
+    z-index: 100;
+    animation: fade-in .18s ease;
+  }
+  @keyframes fade-in{ from{opacity:0;} to{opacity:1;} }
+  @media (min-width: 640px){
+    .modal-overlay{ align-items:center; }
+  }
+  .modal{
+    background: var(--bg-grad);
+    width: 100%; max-width: 520px;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 26px 26px 0 0;
+    padding: 22px 22px calc(26px + env(safe-area-inset-bottom));
+    animation: slide-up .22s ease;
+  }
+  @media (min-width: 640px){
+    .modal{ border-radius: 26px; margin: 20px; }
+  }
+  @keyframes slide-up{ from{ transform: translateY(30px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
+  .modal h2{
+    font-family:'Gowun Dodum', cursive;
+    font-size: 20px; margin-bottom: 18px;
+  }
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block; font-size: 12.5px; font-weight:700; color: var(--text-soft); margin-bottom: 7px;
+  }
+  .field input[type="text"], .field input[type="date"]{
+    width:100%; background: var(--input-bg); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 12px 14px; font-size: 14.5px; color: var(--text);
+  }
+  .field input:focus{ outline:none; border-color: var(--accent); }
+  .priority-select{ display:flex; gap:8px; }
+  .priority-select button{
+    flex:1; padding: 11px 0; border-radius: 14px; font-weight:800; font-size: 13.5px;
+    border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text-soft);
+  }
+  .priority-select button[data-p="high"].active{ background: var(--p-high-bg); color: var(--p-high-text); border-color: var(--p-high-text); }
+  .priority-select button[data-p="mid"].active{ background: var(--p-mid-bg); color: var(--p-mid-text); border-color: var(--p-mid-text); }
+  .priority-select button[data-p="low"].active{ background: var(--p-low-bg); color: var(--p-low-text); border-color: var(--p-low-text); }
+
+  .draft-subtask-list{ display:flex; flex-direction:column; gap:6px; margin-bottom: 8px; }
+  .draft-subtask-item{
+    display:flex; align-items:center; gap:8px;
+    background: var(--input-bg); border:1px solid var(--border);
+    border-radius: 12px; padding: 8px 12px; font-size: 13px;
+  }
+  .draft-subtask-item span{ flex:1; }
+  .draft-subtask-item button{ color: var(--text-soft); font-size: 13px; }
+  .add-subtask-row{ display:flex; gap:8px; }
+  .add-subtask-row input{
+    flex:1; background: var(--input-bg); border:1.5px solid var(--border);
+    border-radius: 14px; padding: 10px 12px; font-size: 13.5px; color: var(--text);
+  }
+  .add-subtask-row button{
+    background: var(--accent-soft); color: var(--accent-dark); font-weight:800;
+    padding: 0 16px; border-radius: 14px; font-size: 13px;
+  }
+
+  .modal-btn-row{ display:flex; gap:10px; margin-top: 22px; }
+  .btn-cancel, .btn-save{
+    flex:1; padding: 13px 0; border-radius: 16px; font-weight:800; font-size: 14.5px;
+  }
+  .btn-cancel{ background: var(--card-bg); color: var(--text-soft); border: 1.5px solid var(--border); }
+  .btn-save{ background: var(--accent); color:#fff; }
+  .btn-save:active, .btn-cancel:active{ transform: scale(.98); }
+
+  /* 설정 모달 */
+  .settings-section{ margin-bottom: 22px; }
+  .settings-section h3{ font-size: 13.5px; font-weight:800; color: var(--text-soft); margin-bottom: 10px; }
+  .theme-grid{ display:flex; gap: 12px; flex-wrap:wrap; }
+  .theme-swatch{
+    width: 54px; display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .theme-swatch .dot{
+    width: 42px; height:42px; border-radius: 999px;
+    border: 3px solid transparent;
+    position:relative;
+  }
+  .theme-swatch.active .dot{ border-color: var(--text); }
+  .theme-swatch span{ font-size: 11px; color: var(--text-soft); font-weight:700; }
+  .dot.t-pink{ background: linear-gradient(135deg,#FBE4EC,#FF7CA3); }
+  .dot.t-dark{ background: linear-gradient(135deg,#241D26,#FF7CA3); }
+  .dot.t-blue{ background: linear-gradient(135deg,#E6F0FB,#5B93E8); }
+  .dot.t-mint{ background: linear-gradient(135deg,#E3F7EE,#3FBE8C); }
+  .dot.t-lavender{ background: linear-gradient(135deg,#F0EAFB,#9B7FE0); }
+
+  .scale-options{ display:flex; gap:8px; }
+  .scale-options button{
+    flex:1; padding: 12px 0; border-radius: 14px; font-weight:700; font-size: 13px;
+    background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-soft);
+  }
+  .scale-options button.active{ background: var(--accent); color:#fff; border-color: var(--accent); }
+  .scale-options button small{ display:block; font-weight:600; font-size: 10.5px; margin-top:2px; opacity:.85; }
+
+  .loading-msg{ text-align:center; padding: 40px 0; color: var(--text-soft); font-size: 13px; }
+</style>
+</head>
+<body data-theme="pink" data-scale="m">
+
+  <div class="app-wrap">
+    <header class="top">
+      <div class="title-row">
+        <div class="title">🌸 스터디 플래너</div>
+        <div class="date" id="todayLabel"></div>
+      </div>
+      <div class="badge-count" id="taskCountBadge">0개 남음</div>
+    </header>
+
+    <section class="quote-card">
+      <div class="quote-text" id="quoteText">오늘도 한 걸음, 꾸준함이 결국 이깁니다.</div>
+      <div class="quote-foot">
+        <button class="quote-refresh" id="quoteRefreshBtn">다른 명언 ↻</button>
+      </div>
+    </section>
+
+    <section id="urgentBanner" class="urgent-banner hidden">
+      <button class="urgent-close" id="urgentCloseBtn">닫기</button>
+      <div class="u-title">⏰ 내일이 마감이에요!</div>
+      <ul id="urgentList"></ul>
+    </section>
+
+    <div class="filter-tabs">
+      <button data-filter="all" class="active">전체</button>
+      <button data-filter="active">진행중</button>
+      <button data-filter="done">완료</button>
+    </div>
+
+    <main id="taskList">
+      <div class="loading-msg">불러오는 중...</div>
+    </main>
+  </div>
+
+  <!-- 하단 네비게이션 -->
+  <nav class="bottom-nav">
+    <button class="nav-icon-btn" id="homeBtn" title="홈">
+      <svg viewBox="0 0 24 24"><path d="M12 3.2 2.6 10.8v10h6.2v-6.4h6.4v6.4h6.2v-10L12 3.2Z"/></svg>
+    </button>
+    <button class="fab" id="addTaskBtn" title="할 일 추가">
+      <svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+    </button>
+    <button class="nav-icon-btn" id="settingsBtn" title="설정">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94a7.14 7.14 0 0 0 .06-.94 7.14 7.14 0 0 0-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.6.24-1.15.56-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.62-.06.94s.02.63.06.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.32.66.22l2.39-.96c.48.38 1.03.7 1.63.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.6-.24 1.15-.56 1.63-.94l2.39.96c.24.1.52.02.66-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/></svg>
+    </button>
+  </nav>
+
+  <!-- 할 일 추가 모달 -->
+  <div class="modal-overlay hidden" id="taskModalOverlay">
+    <div class="modal">
+      <h2>새 할 일 추가</h2>
+      <div class="field">
+        <label>할 일 제목</label>
+        <input type="text" id="taskTitleInput" placeholder="예: 수학 3단원 복습" maxlength="60" />
+      </div>
+      <div class="field">
+        <label>우선도</label>
+        <div class="priority-select">
+          <button data-p="high" type="button">상</button>
+          <button data-p="mid" type="button" class="active">중</button>
+          <button data-p="low" type="button">하</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>마감일</label>
+        <input type="date" id="taskDueInput" />
+      </div>
+      <div class="field">
+        <label>세부 할 일 (선택)</label>
+        <div class="draft-subtask-list" id="draftSubtaskList"></div>
+        <div class="add-subtask-row">
+          <input type="text" id="draftSubtaskInput" placeholder="세부 단계 입력 후 추가" maxlength="40" />
+          <button type="button" id="draftSubtaskAddBtn">추가</button>
+        </div>
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn-cancel" id="taskCancelBtn">취소</button>
+        <button class="btn-save" id="taskSaveBtn">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 설정 모달 -->
+  <div class="modal-overlay hidden" id="settingsModalOverlay">
+    <div class="modal">
+      <h2>⚙️ 설정</h2>
+      <div class="settings-section">
+        <h3>테마 색상</h3>
+        <div class="theme-grid" id="themeGrid">
+          <button class="theme-swatch" data-theme="pink"><span class="dot t-pink"></span><span>핑크</span></button>
+          <button class="theme-swatch" data-theme="dark"><span class="dot t-dark"></span><span>다크</span></button>
+          <button class="theme-swatch" data-theme="blue"><span class="dot t-blue"></span><span>블루</span></button>
+          <button class="theme-swatch" data-theme="mint"><span class="dot t-mint"></span><span>민트</span></button>
+          <button class="theme-swatch" data-theme="lavender"><span class="dot t-lavender"></span><span>라벤더</span></button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>UI 비율</h3>
+        <div class="scale-options" id="scaleOptions">
+          <button data-scale="s">아담하게<small>작게</small></button>
+          <button data-scale="m">기본<small>보통</small></button>
+          <button data-scale="l">크게<small>편하게</small></button>
+        </div>
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn-save" id="settingsCloseBtn" style="flex:1;">완료</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Firebase (CDN, compat) ===================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+  /* ============================================================
+     Firebase 초기화
+     모든 데이터는 students/10621 문서 아래 하위 컬렉션에 저장됩니다.
+     - students/10621/tasks/{taskId}        : 할 일 데이터
+     - students/10621/settings/preferences  : 테마 / UI 비율 설정
+  ============================================================ */
+  const firebaseConfig = {
+    apiKey: "AIzaSyANA-lTFGboIfklqQewlVk49GUQ_Am33aE",
+    authDomain: "garim-study-planner.firebaseapp.com",
+    projectId: "garim-study-planner",
+    storageBucket: "garim-study-planner.firebasestorage.app",
+    messagingSenderId: "1048447885260",
+    appId: "1:1048447885260:web:935234dd0c96860583c769"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const STUDENT_ID = "10621"; // 본인 학번
+  const studentDoc   = db.collection('students').doc(STUDENT_ID);
+  const tasksCol      = studentDoc.collection('tasks');
+  const settingsDocRef = studentDoc.collection('settings').doc('preferences');
+
+  /* ============================================================
+     동기부여 명언 (원문 인용이 아닌 자체 작성 문구)
+  ============================================================ */
+  const QUOTES = [
+    "오늘도 한 걸음, 꾸준함이 결국 이깁니다.",
+    "완벽하지 않아도 괜찮아요, 시작한 것만으로도 절반은 성공이에요.",
+    "지금의 작은 노력이 미래의 나를 만듭니다.",
+    "포기하고 싶을 때가 바로 가장 성장하고 있는 순간이에요.",
+    "하루 30분의 집중이 한 달의 습관을 만듭니다.",
+    "잘하고 있어요, 조금만 더 힘내봐요!",
+    "실수는 배움의 증거일 뿐이에요.",
+    "오늘 할 일을 내일로 미루지 않는 것, 그게 자신감의 시작입니다.",
+    "느려도 괜찮아요, 멈추지만 않으면 돼요.",
+    "지금 이 순간의 집중이 나중의 여유를 만들어줍니다.",
+    "작은 목표를 이루는 기쁨이 큰 목표를 이루는 힘이 됩니다.",
+    "쉬는 것도 계획의 일부예요, 너무 몰아붙이지 마세요.",
+    "어제보다 나은 오늘이면 충분해요.",
+    "할 수 있다는 믿음이 절반은 이미 해낸 거예요.",
+    "노력은 배신하지 않아요, 시간이 조금 걸릴 뿐이죠.",
+    "집중력은 근육과 같아서, 쓸수록 강해집니다.",
+    "지금 흘리는 땀이 나중의 자유를 만들어줍니다.",
+    "완벽한 계획보다 실천하는 계획이 더 힘이 셉니다.",
+    "오늘의 계획표가 내일의 자신감이 됩니다.",
+    "스스로를 믿는 만큼, 딱 그만큼 해낼 수 있어요."
+  ];
+
+  /* ============================================================
+     상태
+  ============================================================ */
+  let tasksCache = {};       // id -> task
+  let currentFilter = 'all'; // all | active | done
+  let expandedIds = new Set();
+  let draftSubtasks = [];    // 새 할 일 작성 중 임시 세부 할 일
+  let draftPriority = 'mid';
+  let currentSettings = { theme: 'pink', scale: 'm' };
+
+  /* ============================================================
+     유틸
+  ============================================================ */
+  function uid(prefix){
+    return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  function todayStr(offsetDays = 0){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() + offsetDays);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function ddayInfo(dueDateStr){
+    const today = new Date(todayStr()+'T00:00:00');
+    const due = new Date(dueDateStr+'T00:00:00');
+    const diff = Math.round((due - today) / 86400000);
+    if (diff === 0) return { text: '오늘 마감', cls: 'urgent' };
+    if (diff === 1) return { text: '내일 마감', cls: 'urgent' };
+    if (diff < 0)  return { text: `${-diff}일 지남`, cls: 'overdue' };
+    return { text: `D-${diff}`, cls: '' };
+  }
+  function priorityLabel(p){
+    return p === 'high' ? '상' : p === 'low' ? '하' : '중';
+  }
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  /* ============================================================
+     오늘 날짜 표시 + 랜덤 명언
+  ============================================================ */
+  const dayNames = ['일','월','화','수','목','금','토'];
+  const now = new Date();
+  document.getElementById('todayLabel').textContent =
+    `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
+
+  function showRandomQuote(){
+    const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    document.getElementById('quoteText').textContent = q;
+  }
+  showRandomQuote();
+  document.getElementById('quoteRefreshBtn').addEventListener('click', showRandomQuote);
+
+  /* ============================================================
+     설정 (테마 / UI 비율) - Firestore 실시간 연동
+  ============================================================ */
+  function applySettingsToUI(settings){
+    document.body.setAttribute('data-theme', settings.theme || 'pink');
+    document.body.setAttribute('data-scale', settings.scale || 'm');
+
+    document.querySelectorAll('.theme-swatch').forEach(el=>{
+      el.classList.toggle('active', el.dataset.theme === (settings.theme || 'pink'));
+    });
+    document.querySelectorAll('#scaleOptions button').forEach(el=>{
+      el.classList.toggle('active', el.dataset.scale === (settings.scale || 'm'));
+    });
+  }
+
+  settingsDocRef.onSnapshot(doc=>{
+    currentSettings = doc.exists ? doc.data() : { theme: 'pink', scale: 'm' };
+    applySettingsToUI(currentSettings);
+  }, err=>{
+    console.error('설정 불러오기 실패:', err);
+  });
+
+  document.getElementById('themeGrid').addEventListener('click', e=>{
+    const btn = e.target.closest('.theme-swatch');
+    if(!btn) return;
+    settingsDocRef.set({ theme: btn.dataset.theme }, { merge: true }).catch(console.error);
+  });
+  document.getElementById('scaleOptions').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-scale]');
+    if(!btn) return;
+    settingsDocRef.set({ scale: btn.dataset.scale }, { merge: true }).catch(console.error);
+  });
+
+  /* ============================================================
+     할 일 목록 - Firestore 실시간 연동
+  ============================================================ */
+  tasksCol.orderBy('dueDate', 'asc').onSnapshot(snapshot=>{
+    tasksCache = {};
+    snapshot.forEach(doc=>{
+      tasksCache[doc.id] = { id: doc.id, ...doc.data() };
+    });
+    renderTasks();
+    checkUrgentTasks();
+  }, err=>{
+    console.error('할 일 목록 불러오기 실패:', err);
+    document.getElementById('taskList').innerHTML =
+      '<div class="loading-msg">데이터를 불러오지 못했어요. Firestore 규칙을 확인해주세요.</div>';
+  });
+
+  function renderTasks(){
+    const listEl = document.getElementById('taskList');
+    let items = Object.values(tasksCache);
+
+    if (currentFilter === 'active') items = items.filter(t=>!t.completed);
+    if (currentFilter === 'done')   items = items.filter(t=>t.completed);
+
+    items.sort((a,b)=>{
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return (a.dueDate || '').localeCompare(b.dueDate || '');
+    });
+
+    const remaining = Object.values(tasksCache).filter(t=>!t.completed).length;
+    document.getElementById('taskCountBadge').textContent = `${remaining}개 남음`;
+
+    if (items.length === 0){
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="emoji">🌷</div>
+          <p>${currentFilter === 'done' ? '완료한 할 일이 아직 없어요' : '오늘도 화이팅! + 버튼으로 할 일을 추가해보세요'}</p>
+        </div>`;
+      return;
+    }
+
+    listEl.innerHTML = items.map(t=>{
+      const dd = ddayInfo(t.dueDate);
+      const subtasks = t.subtasks || [];
+      const doneCount = subtasks.filter(s=>s.completed).length;
+      const expanded = expandedIds.has(t.id);
+      const overdueClass = (!t.completed && dd.cls === 'overdue') ? 'overdue' : '';
+
+      return `
+      <div class="task-card ${t.completed ? 'done' : ''} ${overdueClass} ${expanded ? 'expanded' : ''}" data-id="${t.id}">
+        <div class="task-top">
+          <button class="task-check ${t.completed ? 'checked' : ''}" data-action="toggle-complete" data-id="${t.id}">
+            <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 20.6 7.4 19.2 6z"/></svg>
+          </button>
+          <div class="task-main" data-action="expand" data-id="${t.id}">
+            <div class="task-head-row">
+              <span class="p-badge ${t.priority}">${priorityLabel(t.priority)}</span>
+              <span class="task-title">${escapeHtml(t.title)}</span>
+            </div>
+            <div class="task-meta-row">
+              <span class="dday-badge ${dd.cls}">${dd.text}</span>
+              ${subtasks.length ? `<span class="sub-progress">세부 ${doneCount}/${subtasks.length}</span>` : ''}
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="icon-btn-sm" data-action="delete" data-id="${t.id}" title="삭제">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12l-1 13H7L6 7Zm3-3h6l1 2H8l1-2Z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="subtask-wrap">
+          <ul>
+            ${subtasks.map(s=>`
+              <li class="subtask-item ${s.completed ? 'done' : ''}">
+                <button class="sub-check ${s.completed ? 'checked' : ''}" data-action="toggle-subtask" data-id="${t.id}" data-sub-id="${s.id}">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 20.6 7.4 19.2 6z"/></svg>
+                </button>
+                <span class="sub-text">${escapeHtml(s.text)}</span>
+              </li>`).join('')}
+          </ul>
+          <form class="subtask-add-form" data-task-id="${t.id}">
+            <input type="text" placeholder="세부 할 일 추가" maxlength="40" />
+            <button type="submit">추가</button>
+          </form>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  /* 필터 탭 */
+  document.querySelector('.filter-tabs').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-filter]');
+    if(!btn) return;
+    currentFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-tabs button').forEach(b=>b.classList.toggle('active', b===btn));
+    renderTasks();
+  });
+
+  /* 할 일 카드 이벤트 위임 */
+  document.getElementById('taskList').addEventListener('click', e=>{
+    const actionEl = e.target.closest('[data-action]');
+    if(!actionEl) return;
+    const action = actionEl.dataset.action;
+    const id = actionEl.dataset.id;
+    const task = tasksCache[id];
+    if(!task) return;
+
+    if (action === 'toggle-complete'){
+      tasksCol.doc(id).update({ completed: !task.completed }).catch(console.error);
+    } else if (action === 'delete'){
+      if (confirm(`'${task.title}' 할 일을 삭제할까요?`)){
+        tasksCol.doc(id).delete().catch(console.error);
+      }
+    } else if (action === 'expand'){
+      if (expandedIds.has(id)) expandedIds.delete(id); else expandedIds.add(id);
+      renderTasks();
+    } else if (action === 'toggle-subtask'){
+      const subId = actionEl.dataset.subId;
+      const newSubtasks = (task.subtasks || []).map(s=>
+        s.id === subId ? { ...s, completed: !s.completed } : s
+      );
+      tasksCol.doc(id).update({ subtasks: newSubtasks }).catch(console.error);
+    }
+  });
+
+  /* 기존 할 일에 세부 할 일 추가 */
+  document.getElementById('taskList').addEventListener('submit', e=>{
+    const form = e.target.closest('.subtask-add-form');
+    if(!form) return;
+    e.preventDefault();
+    const taskId = form.dataset.taskId;
+    const input = form.querySelector('input');
+    const text = input.value.trim();
+    if(!text) return;
+    const task = tasksCache[taskId];
+    const newSubtasks = [...(task.subtasks || []), { id: uid('s'), text, completed: false }];
+    tasksCol.doc(taskId).update({ subtasks: newSubtasks })
+      .then(()=>{ input.value=''; })
+      .catch(console.error);
+  });
+
+  /* ============================================================
+     긴급 알림 (마감 하루 전, 미완료)
+  ============================================================ */
+  function checkUrgentTasks(){
+    const tomorrow = todayStr(1);
+    const urgent = Object.values(tasksCache).filter(t=> !t.completed && t.dueDate === tomorrow);
+    const banner = document.getElementById('urgentBanner');
+    const dismissKey = 'urgentDismissed_' + todayStr();
+
+    if (urgent.length === 0 || sessionStorage.getItem(dismissKey)){
+      banner.classList.add('hidden');
+      return;
+    }
+    document.getElementById('urgentList').innerHTML =
+      urgent.map(t=>`<li>• [${priorityLabel(t.priority)}] ${escapeHtml(t.title)}</li>`).join('');
+    banner.classList.remove('hidden');
+  }
+  document.getElementById('urgentCloseBtn').addEventListener('click', ()=>{
+    sessionStorage.setItem('urgentDismissed_' + todayStr(), '1');
+    document.getElementById('urgentBanner').classList.add('hidden');
+  });
+
+  /* ============================================================
+     할 일 추가 모달
+  ============================================================ */
+  const taskModalOverlay = document.getElementById('taskModalOverlay');
+  const taskTitleInput = document.getElementById('taskTitleInput');
+  const taskDueInput = document.getElementById('taskDueInput');
+
+  function openTaskModal(){
+    taskTitleInput.value = '';
+    taskDueInput.value = todayStr(1);
+    draftPriority = 'mid';
+    draftSubtasks = [];
+    document.querySelectorAll('.priority-select button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.p === 'mid');
+    });
+    renderDraftSubtasks();
+    taskModalOverlay.classList.remove('hidden');
+    setTimeout(()=>taskTitleInput.focus(), 50);
+  }
+  function closeTaskModal(){
+    taskModalOverlay.classList.add('hidden');
+  }
+  document.getElementById('addTaskBtn').addEventListener('click', openTaskModal);
+  document.getElementById('taskCancelBtn').addEventListener('click', closeTaskModal);
+  taskModalOverlay.addEventListener('click', e=>{
+    if (e.target === taskModalOverlay) closeTaskModal();
+  });
+
+  document.querySelector('.priority-select').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-p]');
+    if(!btn) return;
+    draftPriority = btn.dataset.p;
+    document.querySelectorAll('.priority-select button').forEach(b=>b.classList.toggle('active', b===btn));
+  });
+
+  function renderDraftSubtasks(){
+    const el = document.getElementById('draftSubtaskList');
+    el.innerHTML = draftSubtasks.map((s, i)=>`
+      <div class="draft-subtask-item">
+        <span>${escapeHtml(s.text)}</span>
+        <button type="button" data-idx="${i}">✕</button>
+      </div>`).join('');
+  }
+  document.getElementById('draftSubtaskList').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-idx]');
+    if(!btn) return;
+    draftSubtasks.splice(Number(btn.dataset.idx), 1);
+    renderDraftSubtasks();
+  });
+  function addDraftSubtask(){
+    const input = document.getElementById('draftSubtaskInput');
+    const text = input.value.trim();
+    if(!text) return;
+    draftSubtasks.push({ id: uid('s'), text, completed: false });
+    input.value = '';
+    renderDraftSubtasks();
+    input.focus();
+  }
+  document.getElementById('draftSubtaskAddBtn').addEventListener('click', addDraftSubtask);
+  document.getElementById('draftSubtaskInput').addEventListener('keydown', e=>{
+    if (e.key === 'Enter'){ e.preventDefault(); addDraftSubtask(); }
+  });
+
+  document.getElementById('taskSaveBtn').addEventListener('click', ()=>{
+    const title = taskTitleInput.value.trim();
+    const dueDate = taskDueInput.value;
+    if (!title){ alert('할 일 제목을 입력해주세요.'); taskTitleInput.focus(); return; }
+    if (!dueDate){ alert('마감일을 선택해주세요.'); taskDueInput.focus(); return; }
+
+    tasksCol.add({
+      title,
+      priority: draftPriority,
+      dueDate,
+      completed: false,
+      subtasks: draftSubtasks,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      closeTaskModal();
+    }).catch(err=>{
+      console.error(err);
+      alert('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+    });
+  });
+
+  /* ============================================================
+     설정 모달
+  ============================================================ */
+  const settingsModalOverlay = document.getElementById('settingsModalOverlay');
+  document.getElementById('settingsBtn').addEventListener('click', ()=>{
+    applySettingsToUI(currentSettings);
+    settingsModalOverlay.classList.remove('hidden');
+  });
+  document.getElementById('settingsCloseBtn').addEventListener('click', ()=>{
+    settingsModalOverlay.classList.add('hidden');
+  });
+  settingsModalOverlay.addEventListener('click', e=>{
+    if (e.target === settingsModalOverlay) settingsModalOverlay.classList.add('hidden');
+  });
+
+  /* ============================================================
+     홈 버튼: 모달 닫고 필터를 '전체'로, 최상단으로 스크롤
+  ============================================================ */
+  document.getElementById('homeBtn').addEventListener('click', ()=>{
+    taskModalOverlay.classList.add('hidden');
+    settingsModalOverlay.classList.add('hidden');
+    currentFilter = 'all';
+    document.querySelectorAll('.filter-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.filter==='all'));
+    renderTasks();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+  </script>
+</body>
+</html>
