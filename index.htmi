@@ -24,31 +24,46 @@
   ul { list-style: none; }
   .hidden { display: none !important; }
 
-  /* ===================== 테마 토큰 ===================== */
-  body[data-theme="pink"]{
+  /* ===================== 테마 토큰 (색상 4종 × 라이트/다크 = 8조합) ===================== */
+  body[data-color="pink"][data-mode="light"]{
     --bg:#FBE4EC; --bg-grad:#FCEFF3; --card-bg:#FFFFFF; --text:#4A3B42; --text-soft:#9A8590;
     --accent:#FF7CA3; --accent-dark:#F2578A; --accent-soft:#FFE1EC; --border:#FFD3E1;
     --shadow: 230,120,150; --input-bg:#FFF6F9;
   }
-  body[data-theme="dark"]{
-    --bg:#201A22; --bg-grad:#241D26; --card-bg:#2E2530; --text:#F3E9EE; --text-soft:#B9A6B2;
-    --accent:#FF7CA3; --accent-dark:#E85585; --accent-soft:#3A2C36; --border:#453640;
-    --shadow: 0,0,0; --input-bg:#251E27;
+  body[data-color="pink"][data-mode="dark"]{
+    --bg:#221A1E; --bg-grad:#271D22; --card-bg:#2F242A; --text:#F5E6EC; --text-soft:#C9A8B5;
+    --accent:#FF7CA3; --accent-dark:#E85585; --accent-soft:#3D2830; --border:#4A2F3A;
+    --shadow: 0,0,0; --input-bg:#291F25;
   }
-  body[data-theme="blue"]{
+  body[data-color="blue"][data-mode="light"]{
     --bg:#E6F0FB; --bg-grad:#EEF5FD; --card-bg:#FFFFFF; --text:#25384A; --text-soft:#7086A0;
     --accent:#5B93E8; --accent-dark:#3E75CC; --accent-soft:#DCEBFF; --border:#CFE1F7;
     --shadow: 90,140,220; --input-bg:#F3F8FE;
   }
-  body[data-theme="mint"]{
+  body[data-color="blue"][data-mode="dark"]{
+    --bg:#151C25; --bg-grad:#1A222C; --card-bg:#1F2833; --text:#E8F0FA; --text-soft:#9CB0C6;
+    --accent:#5B93E8; --accent-dark:#4A80D8; --accent-soft:#293445; --border:#324357;
+    --shadow: 0,0,0; --input-bg:#1A222C;
+  }
+  body[data-color="mint"][data-mode="light"]{
     --bg:#E3F7EE; --bg-grad:#ECFAF3; --card-bg:#FFFFFF; --text:#20443A; --text-soft:#6C9C8B;
     --accent:#3FBE8C; --accent-dark:#2A9C70; --accent-soft:#D6F5E7; --border:#C7EDDB;
     --shadow: 60,180,140; --input-bg:#F2FBF6;
   }
-  body[data-theme="lavender"]{
+  body[data-color="mint"][data-mode="dark"]{
+    --bg:#142420; --bg-grad:#182B25; --card-bg:#1D2F29; --text:#E3F5EC; --text-soft:#96C2B0;
+    --accent:#3FBE8C; --accent-dark:#33A87A; --accent-soft:#25392F; --border:#2F473C;
+    --shadow: 0,0,0; --input-bg:#192923;
+  }
+  body[data-color="lavender"][data-mode="light"]{
     --bg:#F0EAFB; --bg-grad:#F5F1FC; --card-bg:#FFFFFF; --text:#372C4C; --text-soft:#8676A3;
     --accent:#9B7FE0; --accent-dark:#7C5BC9; --accent-soft:#E6DBFA; --border:#DDD0F5;
     --shadow: 140,110,220; --input-bg:#F7F3FD;
+  }
+  body[data-color="lavender"][data-mode="dark"]{
+    --bg:#1D1725; --bg-grad:#221B2C; --card-bg:#282032; --text:#EEE7F8; --text-soft:#B4A3CC;
+    --accent:#9B7FE0; --accent-dark:#8A6BD9; --accent-soft:#332941; --border:#3D3150;
+    --shadow: 0,0,0; --input-bg:#221B2C;
   }
   /* 우선도 색상은 테마와 무관하게 고정 (인식성 유지) */
   :root{
@@ -237,6 +252,7 @@
     color: var(--text-soft);
     font-weight: 600;
   }
+  .memo-indicator{ font-size: calc(12px * var(--scale)); opacity: .85; }
   .task-actions{ display:flex; align-items:center; gap: 6px; flex-shrink:0; }
   .icon-btn-sm{
     width: calc(28px * var(--scale)); height: calc(28px * var(--scale));
@@ -249,6 +265,12 @@
 
   .subtask-wrap{ margin-top: 10px; padding-left: calc(34px * var(--scale)); display:none; }
   .task-card.expanded .subtask-wrap{ display:block; }
+  .memo-box{
+    background: var(--input-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 12px; margin-bottom: 10px;
+    font-size: calc(12.5px * var(--scale)); color: var(--text-soft);
+    white-space: pre-wrap; line-height: 1.5;
+  }
   .subtask-item{
     display:flex; align-items:center; gap:8px; padding: 5px 0;
     font-size: calc(13px * var(--scale));
@@ -343,11 +365,12 @@
   .field label{
     display:block; font-size: 12.5px; font-weight:700; color: var(--text-soft); margin-bottom: 7px;
   }
-  .field input[type="text"], .field input[type="date"]{
+  .field input[type="text"], .field input[type="date"], .field textarea{
     width:100%; background: var(--input-bg); border: 1.5px solid var(--border);
     border-radius: 14px; padding: 12px 14px; font-size: 14.5px; color: var(--text);
   }
-  .field input:focus{ outline:none; border-color: var(--accent); }
+  .field textarea{ resize: vertical; min-height: 60px; font-family: inherit; line-height: 1.5; }
+  .field input:focus, .field textarea:focus{ outline:none; border-color: var(--accent); }
   .priority-select{ display:flex; gap:8px; }
   .priority-select button{
     flex:1; padding: 11px 0; border-radius: 14px; font-weight:800; font-size: 13.5px;
@@ -363,8 +386,12 @@
     background: var(--input-bg); border:1px solid var(--border);
     border-radius: 12px; padding: 8px 12px; font-size: 13px;
   }
-  .draft-subtask-item span{ flex:1; }
-  .draft-subtask-item button{ color: var(--text-soft); font-size: 13px; }
+  .draft-subtask-item input[type="text"]{
+    flex:1; background: transparent; border: none; padding: 2px 0;
+    font-size: 13px; color: var(--text);
+  }
+  .draft-subtask-item input[type="text"]:focus{ outline: none; }
+  .draft-subtask-item .draft-sub-del{ color: var(--text-soft); font-size: 13px; flex-shrink:0; }
   .add-subtask-row{ display:flex; gap:8px; }
   .add-subtask-row input{
     flex:1; background: var(--input-bg); border:1.5px solid var(--border);
@@ -398,7 +425,6 @@
   .theme-swatch.active .dot{ border-color: var(--text); }
   .theme-swatch span{ font-size: 11px; color: var(--text-soft); font-weight:700; }
   .dot.t-pink{ background: linear-gradient(135deg,#FBE4EC,#FF7CA3); }
-  .dot.t-dark{ background: linear-gradient(135deg,#241D26,#FF7CA3); }
   .dot.t-blue{ background: linear-gradient(135deg,#E6F0FB,#5B93E8); }
   .dot.t-mint{ background: linear-gradient(135deg,#E3F7EE,#3FBE8C); }
   .dot.t-lavender{ background: linear-gradient(135deg,#F0EAFB,#9B7FE0); }
@@ -412,9 +438,113 @@
   .scale-options button small{ display:block; font-weight:600; font-size: 10.5px; margin-top:2px; opacity:.85; }
 
   .loading-msg{ text-align:center; padding: 40px 0; color: var(--text-soft); font-size: 13px; }
+
+  /* ===================== 타이머 / 알람 (화면 왼쪽) ===================== */
+  .timer-fab{
+    position: fixed; left: 16px; top: 50%; transform: translateY(-50%);
+    width: 52px; height: 52px; border-radius: 999px;
+    background: var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 8px 20px rgba(var(--shadow), 0.35);
+    z-index: 60;
+  }
+  .timer-fab svg{ width: 24px; height: 24px; fill:#fff; }
+  .timer-fab:active{ transform: translateY(-50%) scale(.94); }
+
+  .timer-panel{
+    position: fixed; left: 16px; top: 50%; transform: translateY(-50%);
+    width: 250px; max-width: calc(100vw - 32px);
+    max-height: 82vh; overflow-y: auto;
+    background: var(--card-bg);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 12px 30px rgba(var(--shadow), 0.28);
+    z-index: 65;
+    animation: pop-in .2s ease;
+  }
+  .timer-panel-header{
+    display:flex; align-items:center; gap:8px; margin-bottom: 14px;
+  }
+  .timer-mode-switch{
+    display:flex; gap:6px; flex:1;
+    background: var(--input-bg); padding:4px; border-radius:14px;
+  }
+  .timer-mode-switch button{
+    flex:1; padding: 8px 0; border-radius:10px;
+    font-size: 12px; font-weight:700; color: var(--text-soft);
+  }
+  .timer-mode-switch button.active{ background: var(--accent); color:#fff; }
+  .timer-close-btn{
+    width:26px; height:26px; border-radius:999px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--text-soft); font-size:13px;
+  }
+  .timer-close-btn:hover{ background: var(--accent-soft); color: var(--accent-dark); }
+
+  .timer-alert{
+    background: linear-gradient(135deg, #FF6F7D, #FF9068);
+    color:#fff; border-radius:14px; padding:10px 12px;
+    font-size:12.5px; font-weight:700; text-align:center; margin-bottom:12px;
+  }
+  .timer-alert button{
+    margin-top:6px; background: rgba(255,255,255,0.25);
+    border-radius:999px; padding:4px 14px; font-size:11.5px; font-weight:700;
+  }
+
+  .timer-display{
+    text-align:center; font-family:'Gowun Dodum', cursive;
+    font-size: 36px; font-weight:700; color: var(--accent-dark);
+    margin: 4px 0 14px; letter-spacing: 1px;
+  }
+  .timer-set-row{ display:flex; gap:10px; margin-bottom:14px; }
+  .timer-set-field{ flex:1; }
+  .timer-set-field label{
+    display:block; text-align:center; font-size:11px; font-weight:700;
+    color: var(--text-soft); margin-bottom:4px;
+  }
+  .timer-set-field input{
+    width:100%; text-align:center; background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius:12px;
+    padding:8px 0; font-size:15px; color: var(--text);
+  }
+  .timer-set-field input:focus{ outline:none; border-color: var(--accent); }
+  .timer-btn-row{ display:flex; gap:8px; }
+  .timer-main-btn{
+    flex:1; background: var(--accent); color:#fff; font-weight:800;
+    padding:11px 0; border-radius:14px; font-size:13.5px;
+  }
+  .timer-sub-btn{
+    flex:1; background: var(--input-bg); color: var(--text-soft); font-weight:700;
+    padding:11px 0; border-radius:14px; font-size:13.5px; border:1.5px solid var(--border);
+  }
+
+  .alarm-add-row{ display:flex; gap:8px; margin-bottom:12px; }
+  .alarm-add-row input{
+    flex:1; background: var(--input-bg); border:1.5px solid var(--border);
+    border-radius:12px; padding:9px 10px; font-size:13.5px; color: var(--text);
+  }
+  .alarm-add-row input:focus{ outline:none; border-color: var(--accent); }
+  .alarm-add-row button{
+    background: var(--accent); color:#fff; font-weight:800;
+    padding:0 14px; border-radius:12px; font-size:13px;
+  }
+  .alarm-list{ display:flex; flex-direction:column; gap:8px; }
+  .alarm-item{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--input-bg); border:1px solid var(--border);
+    border-radius:12px; padding:9px 12px; font-size:13.5px; font-weight:700; color: var(--text);
+  }
+  .alarm-item button{ color: var(--text-soft); font-size:13px; }
+  .alarm-item button:hover{ color: var(--accent-dark); }
+  .alarm-empty-hint{ text-align:center; font-size:12px; color: var(--text-soft); padding:8px 0; }
+
+  @media (max-width: 380px){
+    .timer-panel{ left: 10px; width: 220px; padding: 14px; }
+    .timer-fab{ left: 10px; }
+  }
 </style>
 </head>
-<body data-theme="pink" data-scale="m">
+<body data-color="pink" data-mode="light" data-scale="m">
 
   <div class="app-wrap">
     <header class="top">
@@ -449,6 +579,50 @@
     </main>
   </div>
 
+  <!-- 타이머 / 알람 (화면 왼쪽에 항상 떠 있는 흰색 둥근 패널) -->
+  <button class="timer-fab" id="timerFab" title="타이머 / 알람">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm.75 5v5.4l4.2 2.5-.75 1.3-5-3V7h1.5Z"/></svg>
+  </button>
+
+  <div class="timer-panel hidden" id="timerPanel">
+    <div class="timer-panel-header">
+      <div class="timer-mode-switch">
+        <button type="button" data-tmode="timer" class="active">⏱ 타이머</button>
+        <button type="button" data-tmode="alarm">⏰ 알람</button>
+      </div>
+      <button type="button" class="timer-close-btn" id="timerPanelCloseBtn">✕</button>
+    </div>
+
+    <div class="timer-alert hidden" id="timerAlertBox"></div>
+
+    <div class="timer-view" id="timerView">
+      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div class="timer-set-row">
+        <div class="timer-set-field">
+          <label>분</label>
+          <input type="number" id="timerMinInput" min="0" max="180" value="25" />
+        </div>
+        <div class="timer-set-field">
+          <label>초</label>
+          <input type="number" id="timerSecInput" min="0" max="59" value="0" />
+        </div>
+      </div>
+      <div class="timer-btn-row">
+        <button type="button" class="timer-main-btn" id="timerStartPauseBtn">시작</button>
+        <button type="button" class="timer-sub-btn" id="timerResetBtn">초기화</button>
+      </div>
+    </div>
+
+    <div class="timer-view hidden" id="alarmView">
+      <div class="alarm-add-row">
+        <input type="time" id="alarmTimeInput" />
+        <button type="button" id="alarmAddBtn">추가</button>
+      </div>
+      <ul class="alarm-list" id="alarmList"></ul>
+      <p class="alarm-empty-hint" id="alarmEmptyHint">설정된 알람이 없어요</p>
+    </div>
+  </div>
+
   <!-- 하단 네비게이션 -->
   <nav class="bottom-nav">
     <button class="nav-icon-btn" id="homeBtn" title="홈">
@@ -465,7 +639,7 @@
   <!-- 할 일 추가 모달 -->
   <div class="modal-overlay hidden" id="taskModalOverlay">
     <div class="modal">
-      <h2>새 할 일 추가</h2>
+      <h2 id="taskModalTitle">새 할 일 추가</h2>
       <div class="field">
         <label>할 일 제목</label>
         <input type="text" id="taskTitleInput" placeholder="예: 수학 3단원 복습" maxlength="60" />
@@ -483,7 +657,11 @@
         <input type="date" id="taskDueInput" />
       </div>
       <div class="field">
-        <label>세부 할 일 (선택)</label>
+        <label>메모 (선택)</label>
+        <textarea id="taskMemoInput" rows="3" placeholder="참고할 내용을 자유롭게 적어보세요"></textarea>
+      </div>
+      <div class="field">
+        <label>세부 할 일 (선택) · 아래 텍스트를 눌러 바로 수정할 수 있어요</label>
         <div class="draft-subtask-list" id="draftSubtaskList"></div>
         <div class="add-subtask-row">
           <input type="text" id="draftSubtaskInput" placeholder="세부 단계 입력 후 추가" maxlength="40" />
@@ -504,11 +682,17 @@
       <div class="settings-section">
         <h3>테마 색상</h3>
         <div class="theme-grid" id="themeGrid">
-          <button class="theme-swatch" data-theme="pink"><span class="dot t-pink"></span><span>핑크</span></button>
-          <button class="theme-swatch" data-theme="dark"><span class="dot t-dark"></span><span>다크</span></button>
-          <button class="theme-swatch" data-theme="blue"><span class="dot t-blue"></span><span>블루</span></button>
-          <button class="theme-swatch" data-theme="mint"><span class="dot t-mint"></span><span>민트</span></button>
-          <button class="theme-swatch" data-theme="lavender"><span class="dot t-lavender"></span><span>라벤더</span></button>
+          <button class="theme-swatch" data-color="pink"><span class="dot t-pink"></span><span>핑크</span></button>
+          <button class="theme-swatch" data-color="blue"><span class="dot t-blue"></span><span>블루</span></button>
+          <button class="theme-swatch" data-color="mint"><span class="dot t-mint"></span><span>민트</span></button>
+          <button class="theme-swatch" data-color="lavender"><span class="dot t-lavender"></span><span>라벤더</span></button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>화면 모드</h3>
+        <div class="scale-options" id="modeToggle">
+          <button data-mode="light">☀️ 라이트</button>
+          <button data-mode="dark">🌙 다크</button>
         </div>
       </div>
       <div class="settings-section">
@@ -586,7 +770,7 @@
   let expandedIds = new Set();
   let draftSubtasks = [];    // 새 할 일 작성 중 임시 세부 할 일
   let draftPriority = 'mid';
-  let currentSettings = { theme: 'pink', scale: 'm' };
+  let currentSettings = { themeColor: 'pink', darkMode: false, scale: 'm' };
 
   /* ============================================================
      유틸
@@ -640,11 +824,15 @@
      설정 (테마 / UI 비율) - Firestore 실시간 연동
   ============================================================ */
   function applySettingsToUI(settings){
-    document.body.setAttribute('data-theme', settings.theme || 'pink');
+    document.body.setAttribute('data-color', settings.themeColor || 'pink');
+    document.body.setAttribute('data-mode', settings.darkMode ? 'dark' : 'light');
     document.body.setAttribute('data-scale', settings.scale || 'm');
 
     document.querySelectorAll('.theme-swatch').forEach(el=>{
-      el.classList.toggle('active', el.dataset.theme === (settings.theme || 'pink'));
+      el.classList.toggle('active', el.dataset.color === (settings.themeColor || 'pink'));
+    });
+    document.querySelectorAll('#modeToggle button').forEach(el=>{
+      el.classList.toggle('active', (el.dataset.mode === 'dark') === !!settings.darkMode);
     });
     document.querySelectorAll('#scaleOptions button').forEach(el=>{
       el.classList.toggle('active', el.dataset.scale === (settings.scale || 'm'));
@@ -652,7 +840,12 @@
   }
 
   settingsDocRef.onSnapshot(doc=>{
-    currentSettings = doc.exists ? doc.data() : { theme: 'pink', scale: 'm' };
+    const data = doc.exists ? doc.data() : {};
+    currentSettings = {
+      themeColor: data.themeColor || 'pink',
+      darkMode: !!data.darkMode,
+      scale: data.scale || 'm'
+    };
     applySettingsToUI(currentSettings);
   }, err=>{
     console.error('설정 불러오기 실패:', err);
@@ -661,7 +854,12 @@
   document.getElementById('themeGrid').addEventListener('click', e=>{
     const btn = e.target.closest('.theme-swatch');
     if(!btn) return;
-    settingsDocRef.set({ theme: btn.dataset.theme }, { merge: true }).catch(console.error);
+    settingsDocRef.set({ themeColor: btn.dataset.color }, { merge: true }).catch(console.error);
+  });
+  document.getElementById('modeToggle').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-mode]');
+    if(!btn) return;
+    settingsDocRef.set({ darkMode: btn.dataset.mode === 'dark' }, { merge: true }).catch(console.error);
   });
   document.getElementById('scaleOptions').addEventListener('click', e=>{
     const btn = e.target.closest('button[data-scale]');
@@ -730,15 +928,20 @@
             <div class="task-meta-row">
               <span class="dday-badge ${dd.cls}">${dd.text}</span>
               ${subtasks.length ? `<span class="sub-progress">세부 ${doneCount}/${subtasks.length}</span>` : ''}
+              ${t.memo ? `<span class="memo-indicator" title="메모 있음">📝</span>` : ''}
             </div>
           </div>
           <div class="task-actions">
+            <button class="icon-btn-sm" data-action="edit-task" data-id="${t.id}" title="수정">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20.3V17l10.6-10.6 3.3 3.3L7.3 20.3H4Zm14.7-13.9-1.7-1.7a1 1 0 0 1 0-1.4l1.1-1.1a1 1 0 0 1 1.4 0l1.7 1.7a1 1 0 0 1 0 1.4l-1.1 1.1a1 1 0 0 1-1.4 0Z"/></svg>
+            </button>
             <button class="icon-btn-sm" data-action="delete" data-id="${t.id}" title="삭제">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12l-1 13H7L6 7Zm3-3h6l1 2H8l1-2Z"/></svg>
             </button>
           </div>
         </div>
         <div class="subtask-wrap">
+          ${t.memo ? `<div class="memo-box">${escapeHtml(t.memo).replace(/\n/g,'<br>')}</div>` : ''}
           <ul>
             ${subtasks.map(s=>`
               <li class="subtask-item ${s.completed ? 'done' : ''}">
@@ -777,6 +980,8 @@
 
     if (action === 'toggle-complete'){
       tasksCol.doc(id).update({ completed: !task.completed }).catch(console.error);
+    } else if (action === 'edit-task'){
+      openTaskModal(id);
     } else if (action === 'delete'){
       if (confirm(`'${task.title}' 할 일을 삭제할까요?`)){
         tasksCol.doc(id).delete().catch(console.error);
@@ -837,14 +1042,37 @@
   const taskModalOverlay = document.getElementById('taskModalOverlay');
   const taskTitleInput = document.getElementById('taskTitleInput');
   const taskDueInput = document.getElementById('taskDueInput');
+  const taskMemoInput = document.getElementById('taskMemoInput');
+  const taskModalTitleEl = document.getElementById('taskModalTitle');
+  const taskSaveBtn = document.getElementById('taskSaveBtn');
+  let editingTaskId = null; // null이면 새 할 일 추가, 값이 있으면 해당 id 수정
 
-  function openTaskModal(){
-    taskTitleInput.value = '';
-    taskDueInput.value = todayStr(1);
-    draftPriority = 'mid';
-    draftSubtasks = [];
+  // taskId를 주면 수정 모드로, 안 주면(또는 null) 새 할 일 추가 모드로 모달을 연다.
+  function openTaskModal(taskId){
+    editingTaskId = taskId || null;
+
+    if (editingTaskId && tasksCache[editingTaskId]){
+      const task = tasksCache[editingTaskId];
+      taskModalTitleEl.textContent = '할 일 수정';
+      taskSaveBtn.textContent = '수정 완료';
+      taskTitleInput.value = task.title || '';
+      taskDueInput.value = task.dueDate || todayStr(1);
+      taskMemoInput.value = task.memo || '';
+      draftPriority = task.priority || 'mid';
+      // 배열을 그대로 참조하면 취소 시에도 원본이 바뀔 수 있어 복사해서 사용
+      draftSubtasks = (task.subtasks || []).map(s=>({ ...s }));
+    } else {
+      taskModalTitleEl.textContent = '새 할 일 추가';
+      taskSaveBtn.textContent = '저장하기';
+      taskTitleInput.value = '';
+      taskDueInput.value = todayStr(1);
+      taskMemoInput.value = '';
+      draftPriority = 'mid';
+      draftSubtasks = [];
+    }
+
     document.querySelectorAll('.priority-select button').forEach(b=>{
-      b.classList.toggle('active', b.dataset.p === 'mid');
+      b.classList.toggle('active', b.dataset.p === draftPriority);
     });
     renderDraftSubtasks();
     taskModalOverlay.classList.remove('hidden');
@@ -852,8 +1080,9 @@
   }
   function closeTaskModal(){
     taskModalOverlay.classList.add('hidden');
+    editingTaskId = null;
   }
-  document.getElementById('addTaskBtn').addEventListener('click', openTaskModal);
+  document.getElementById('addTaskBtn').addEventListener('click', ()=>openTaskModal(null));
   document.getElementById('taskCancelBtn').addEventListener('click', closeTaskModal);
   taskModalOverlay.addEventListener('click', e=>{
     if (e.target === taskModalOverlay) closeTaskModal();
@@ -866,18 +1095,27 @@
     document.querySelectorAll('.priority-select button').forEach(b=>b.classList.toggle('active', b===btn));
   });
 
+  // 세부 할 일 목록을 렌더링한다. 각 항목은 텍스트 입력창이라 바로 수정할 수 있다.
   function renderDraftSubtasks(){
     const el = document.getElementById('draftSubtaskList');
     el.innerHTML = draftSubtasks.map((s, i)=>`
-      <div class="draft-subtask-item">
-        <span>${escapeHtml(s.text)}</span>
-        <button type="button" data-idx="${i}">✕</button>
+      <div class="draft-subtask-item" data-idx="${i}">
+        <input type="text" class="draft-sub-input" value="${escapeHtml(s.text)}" maxlength="40" placeholder="세부 할 일" />
+        <button type="button" class="draft-sub-del">✕</button>
       </div>`).join('');
   }
+  // 입력창에 타이핑할 때는 다시 그리지 않고 배열 값만 조용히 갱신 (다시 그리면 커서가 튐)
+  document.getElementById('draftSubtaskList').addEventListener('input', e=>{
+    const input = e.target.closest('.draft-sub-input');
+    if(!input) return;
+    const idx = Number(input.closest('.draft-subtask-item').dataset.idx);
+    if (draftSubtasks[idx]) draftSubtasks[idx].text = input.value;
+  });
   document.getElementById('draftSubtaskList').addEventListener('click', e=>{
-    const btn = e.target.closest('button[data-idx]');
+    const btn = e.target.closest('.draft-sub-del');
     if(!btn) return;
-    draftSubtasks.splice(Number(btn.dataset.idx), 1);
+    const idx = Number(btn.closest('.draft-subtask-item').dataset.idx);
+    draftSubtasks.splice(idx, 1);
     renderDraftSubtasks();
   });
   function addDraftSubtask(){
@@ -894,25 +1132,39 @@
     if (e.key === 'Enter'){ e.preventDefault(); addDraftSubtask(); }
   });
 
-  document.getElementById('taskSaveBtn').addEventListener('click', ()=>{
+  taskSaveBtn.addEventListener('click', ()=>{
     const title = taskTitleInput.value.trim();
     const dueDate = taskDueInput.value;
+    const memo = taskMemoInput.value.trim();
     if (!title){ alert('할 일 제목을 입력해주세요.'); taskTitleInput.focus(); return; }
     if (!dueDate){ alert('마감일을 선택해주세요.'); taskDueInput.focus(); return; }
 
-    tasksCol.add({
-      title,
-      priority: draftPriority,
-      dueDate,
-      completed: false,
-      subtasks: draftSubtasks,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{
-      closeTaskModal();
-    }).catch(err=>{
-      console.error(err);
-      alert('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
-    });
+    // 내용이 비어버린 세부 할 일은 저장 시 제외
+    const cleanedSubtasks = draftSubtasks
+      .map(s=>({ ...s, text: s.text.trim() }))
+      .filter(s=>s.text.length > 0);
+
+    if (editingTaskId){
+      tasksCol.doc(editingTaskId).update({
+        title, priority: draftPriority, dueDate, memo, subtasks: cleanedSubtasks
+      }).then(closeTaskModal).catch(err=>{
+        console.error(err);
+        alert('수정에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    } else {
+      tasksCol.add({
+        title,
+        priority: draftPriority,
+        dueDate,
+        memo,
+        completed: false,
+        subtasks: cleanedSubtasks,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(closeTaskModal).catch(err=>{
+        console.error(err);
+        alert('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    }
   });
 
   /* ============================================================
@@ -941,6 +1193,211 @@
     renderTasks();
     window.scrollTo({ top:0, behavior:'smooth' });
   });
+
+  /* ============================================================
+     타이머 / 알람 패널 (화면 왼쪽, 세션 동안만 유지되는 기능)
+  ============================================================ */
+  const timerFab = document.getElementById('timerFab');
+  const timerPanel = document.getElementById('timerPanel');
+  const timerPanelCloseBtn = document.getElementById('timerPanelCloseBtn');
+  const timerAlertBox = document.getElementById('timerAlertBox');
+  const timerView = document.getElementById('timerView');
+  const alarmView = document.getElementById('alarmView');
+
+  function openTimerPanel(){
+    timerPanel.classList.remove('hidden');
+    timerFab.classList.add('hidden');
+  }
+  function closeTimerPanel(){
+    timerPanel.classList.add('hidden');
+    timerFab.classList.remove('hidden');
+  }
+  timerFab.addEventListener('click', openTimerPanel);
+  timerPanelCloseBtn.addEventListener('click', closeTimerPanel);
+
+  document.querySelector('.timer-mode-switch').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-tmode]');
+    if(!btn) return;
+    document.querySelectorAll('.timer-mode-switch button').forEach(b=>b.classList.toggle('active', b===btn));
+    const mode = btn.dataset.tmode;
+    timerView.classList.toggle('hidden', mode !== 'timer');
+    alarmView.classList.toggle('hidden', mode !== 'alarm');
+  });
+
+  function hideTimerAlert(){
+    timerAlertBox.classList.add('hidden');
+    timerAlertBox.innerHTML = '';
+  }
+  function showTimerAlert(message){
+    timerAlertBox.innerHTML = `${message}<div><button type="button" id="timerAlertOkBtn">확인</button></div>`;
+    timerAlertBox.classList.remove('hidden');
+    document.getElementById('timerAlertOkBtn').addEventListener('click', hideTimerAlert);
+  }
+
+  // 외부 음원 파일 없이 Web Audio API로 짧은 알림음을 만든다.
+  function playAlertBeep(times){
+    try{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      let t = ctx.currentTime;
+      for (let i = 0; i < (times || 3); i++){
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = 880;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+        osc.start(t);
+        osc.stop(t + 0.3);
+        t += 0.4;
+      }
+    }catch(err){
+      console.error('알림음 재생 실패:', err);
+    }
+  }
+
+  /* ---- 타이머 ---- */
+  const timerDisplay = document.getElementById('timerDisplay');
+  const timerMinInput = document.getElementById('timerMinInput');
+  const timerSecInput = document.getElementById('timerSecInput');
+  const timerStartPauseBtn = document.getElementById('timerStartPauseBtn');
+  const timerResetBtn = document.getElementById('timerResetBtn');
+
+  let timerIntervalId = null;
+  let timerRunning = false;
+  // 아직 한 번도 시작하지 않았거나(혹은 초기화/종료 직후) 입력값을 그대로 반영해야 하는 상태인지
+  let timerIsFresh = true;
+
+  function formatClock(totalSec){
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  function refreshTimerDisplay(){
+    timerDisplay.textContent = formatClock(timerRemainingSec);
+  }
+
+  function readTimerInputSeconds(){
+    const mins = Math.max(0, Math.min(180, parseInt(timerMinInput.value, 10) || 0));
+    const secs = Math.max(0, Math.min(59, parseInt(timerSecInput.value, 10) || 0));
+    return mins * 60 + secs;
+  }
+
+  let timerRemainingSec = readTimerInputSeconds();
+  refreshTimerDisplay();
+
+  // 아직 시작 전(=fresh) 상태에서 분/초 입력을 바꾸면 큰 숫자 표시에 바로 반영된다.
+  function syncTimerFromInputsIfFresh(){
+    if (timerIsFresh && !timerRunning){
+      timerRemainingSec = readTimerInputSeconds();
+      refreshTimerDisplay();
+    }
+  }
+  timerMinInput.addEventListener('input', syncTimerFromInputsIfFresh);
+  timerSecInput.addEventListener('input', syncTimerFromInputsIfFresh);
+
+  function startTimer(){
+    if (timerIsFresh){
+      timerRemainingSec = readTimerInputSeconds();
+    }
+    if (timerRemainingSec <= 0){
+      alert('타이머 시간을 먼저 설정해주세요.');
+      return;
+    }
+    timerIsFresh = false;
+    hideTimerAlert();
+    timerRunning = true;
+    timerStartPauseBtn.textContent = '일시정지';
+    timerIntervalId = setInterval(()=>{
+      timerRemainingSec--;
+      refreshTimerDisplay();
+      if (timerRemainingSec <= 0){
+        clearInterval(timerIntervalId);
+        timerRunning = false;
+        timerIsFresh = true;
+        timerStartPauseBtn.textContent = '시작';
+        playAlertBeep(3);
+        showTimerAlert('⏰ 타이머가 끝났어요!');
+      }
+    }, 1000);
+  }
+  function pauseTimer(){
+    clearInterval(timerIntervalId);
+    timerRunning = false;
+    timerStartPauseBtn.textContent = '시작';
+  }
+  timerStartPauseBtn.addEventListener('click', ()=>{
+    if (timerRunning) pauseTimer(); else startTimer();
+  });
+  timerResetBtn.addEventListener('click', ()=>{
+    clearInterval(timerIntervalId);
+    timerRunning = false;
+    timerIsFresh = true;
+    timerStartPauseBtn.textContent = '시작';
+    timerRemainingSec = readTimerInputSeconds();
+    refreshTimerDisplay();
+    hideTimerAlert();
+  });
+
+  /* ---- 알람 ---- */
+  let alarms = []; // { id, time: 'HH:MM' }
+  const alarmFiredMinuteById = {}; // 같은 분에 여러 번 울리지 않도록 기록
+
+  function renderAlarmList(){
+    const listEl = document.getElementById('alarmList');
+    const emptyHint = document.getElementById('alarmEmptyHint');
+    if (alarms.length === 0){
+      listEl.innerHTML = '';
+      emptyHint.classList.remove('hidden');
+      return;
+    }
+    emptyHint.classList.add('hidden');
+    listEl.innerHTML = alarms
+      .slice()
+      .sort((a,b)=>a.time.localeCompare(b.time))
+      .map(a=>`
+        <li class="alarm-item">
+          <span>⏰ ${a.time}</span>
+          <button type="button" data-alarm-id="${a.id}">✕</button>
+        </li>`).join('');
+  }
+  renderAlarmList();
+
+  document.getElementById('alarmAddBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('alarmTimeInput');
+    const time = input.value;
+    if (!time){ alert('알람 시각을 선택해주세요.'); return; }
+    if (alarms.some(a=>a.time === time)){ alert('이미 같은 시각에 알람이 있어요.'); return; }
+    alarms.push({ id: uid('a'), time });
+    renderAlarmList();
+  });
+  document.getElementById('alarmList').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-alarm-id]');
+    if(!btn) return;
+    alarms = alarms.filter(a=>a.id !== btn.dataset.alarmId);
+    renderAlarmList();
+  });
+
+  // 15초마다 현재 시각과 알람 목록을 비교해서 일치하면 알림을 띄운다.
+  setInterval(()=>{
+    const nowTime = new Date();
+    const hhmm = `${String(nowTime.getHours()).padStart(2,'0')}:${String(nowTime.getMinutes()).padStart(2,'0')}`;
+    alarms.forEach(a=>{
+      if (a.time === hhmm && alarmFiredMinuteById[a.id] !== hhmm){
+        alarmFiredMinuteById[a.id] = hhmm;
+        playAlertBeep(4);
+        showTimerAlert(`⏰ 설정하신 ${a.time} 알람 시간이에요!`);
+        openTimerPanel();
+        document.querySelectorAll('.timer-mode-switch button').forEach(b=>{
+          b.classList.toggle('active', b.dataset.tmode === 'alarm');
+        });
+        timerView.classList.add('hidden');
+        alarmView.classList.remove('hidden');
+      }
+    });
+  }, 15000);
   </script>
 </body>
 </html>
